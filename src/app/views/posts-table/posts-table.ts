@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, Query } from '@angular/core';
 import { environments } from '../../../environments/environments.development';
 import { Apollo, gql } from 'apollo-angular';
+import { TableModule } from 'primeng/table';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 const query = gql`
   #graphql
@@ -16,11 +18,15 @@ const query = gql`
 
 @Component({
   selector: 'app-posts-table',
-  imports: [],
+  imports: [TableModule, ProgressSpinnerModule],
   templateUrl: './posts-table.html',
   styleUrl: './posts-table.scss',
 })
 export class PostsTable implements OnInit {
+  posts: { id: string; title: string; views: number }[] = [];
+
+  loading: boolean = true;
+
   constructor(
     private http: HttpClient,
     private apollo: Apollo,
@@ -43,6 +49,8 @@ export class PostsTable implements OnInit {
         query: query,
       })
       .valueChanges.subscribe((data: any) => {
+        this.posts = [...data.data?.allPosts];
+        this.loading = data.loading;
         console.log('D', data.data);
         console.log('E', data.error);
         console.log('L', data.loading);
