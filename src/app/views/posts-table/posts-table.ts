@@ -1,15 +1,17 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, Query } from '@angular/core';
 import { environments } from '../../../environments/environments.development';
+import { Apollo, gql } from 'apollo-angular';
 
-const query = `#graphql
- query MyQuery{
-  allPosts{
-    id,
-    title,
-    views
+const query = gql`
+  #graphql
+  query MyQuery {
+    allPosts {
+      id
+      title
+      views
+    }
   }
- }
 `;
 
 @Component({
@@ -19,20 +21,32 @@ const query = `#graphql
   styleUrl: './posts-table.scss',
 })
 export class PostsTable implements OnInit {
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private apollo: Apollo,
+  ) {}
 
   ngOnInit(): void {
-    this.getPosts().subscribe({
-      next: (data) => {
-        console.log('RES', data);
-      },
-      error: (err) => {
-        console.error(err);
-      },
-      complete: () => {
-        console.log('Complete');
-      },
-    });
+    // this.getPosts().subscribe({
+    //   next: (data) => {
+    //     console.log('RES', data);
+    //   },
+    //   error: (err) => {
+    //     console.error(err);
+    //   },
+    //   complete: () => {
+    //     console.log('Complete');
+    //   },
+    // });
+    this.apollo
+      .watchQuery({
+        query: query,
+      })
+      .valueChanges.subscribe((data: any) => {
+        console.log('D', data.data);
+        console.log('E', data.error);
+        console.log('L', data.loading);
+      });
   }
 
   getPosts() {
